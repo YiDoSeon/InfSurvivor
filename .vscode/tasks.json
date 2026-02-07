@@ -1,0 +1,88 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build-shared",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/Server/Shared/Shared.csproj",
+                "-p:BuildInParallel=false"
+            ],
+            "problemMatcher": "$msCompile",
+        },
+        {
+            "label": "copy-shared-dll",
+            "type": "shell",
+            "windows": {
+                "command": 
+                "xcopy Shared.dll ${workspaceFolder}\\Client\\Assets\\Plugins\\ /y"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}\\Server\\Shared\\bin\\Debug\\netstandard2.1"
+            },
+            "dependsOn":[
+                "build-shared",
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "build-gen-packet-manager",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/Server/Tools/PacketManagerGenerator/PacketManagerGenerator.csproj",
+            ],
+            "dependsOn": [
+                "copy-shared-dll",
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "run-gen-packet-manager",
+            "type": "shell",
+            "command": "${workspaceFolder}/Server/Tools/PacketManagerGenerator/bin/Debug/net9.0/PacketManagerGenerator.exe",
+            "args": [
+                "${workspaceFolder}"
+            ],
+            "dependsOn":[
+                "build-gen-packet-manager",
+            ],
+            "problemMatcher": "$msCompile",
+            "icon": {"color": "terminal.ansiYellow", "id": "star"}
+        },
+        {
+            "label": "build-server",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/Server/Server/Server.csproj",
+            ],
+            "dependsOrder": "sequence",
+            "dependsOn":[
+                "copy-shared-dll",
+                //"build-shared",
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "build-dummy-client",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/Server/DummyClient/DummyClient.csproj",
+            ],
+            "dependsOrder": "sequence",
+            "dependsOn":[
+                "build-shared",
+            ],
+            "problemMatcher": "$msCompile"
+        },
+    ]
+}
