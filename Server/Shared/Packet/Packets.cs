@@ -87,7 +87,6 @@ namespace Shared.Packet
     {
         [Key(0)] public CVector2 Pos { get; set; }
         [Key(1)] public CVector2 Velocity { get; set; }
-        [Key(2)] public bool IsGrounded { get; set; }
 
         public void MergeFrom(PositionInfo other)
         {
@@ -95,8 +94,6 @@ namespace Shared.Packet
                 Pos = other.Pos;
             if (other.Velocity != default)
                 Velocity = other.Velocity;
-            if (other.IsGrounded != false)
-                IsGrounded = other.IsGrounded;
         }
     }
 
