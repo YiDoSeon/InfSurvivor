@@ -87,6 +87,8 @@ namespace Shared.Packet
     {
         [Key(0)] public CVector2 Pos { get; set; }
         [Key(1)] public CVector2 Velocity { get; set; }
+        [Key(2)] public CVector2 FacingDir { get; set; }
+        [Key(3)] public bool FirePressed { get; set; }
 
         public void MergeFrom(PositionInfo other)
         {
@@ -94,6 +96,10 @@ namespace Shared.Packet
                 Pos = other.Pos;
             if (other.Velocity != default)
                 Velocity = other.Velocity;
+            if (other.FacingDir != default)
+                FacingDir = other.FacingDir;
+            if (other.FirePressed != false)
+                FirePressed = other.FirePressed;
         }
     }
 
@@ -165,7 +171,6 @@ namespace Shared.Packet
         [Key(1)] public long ClientTime { get; set; }
         [Key(2)] public uint SeqNumber { get; set; }
         [Key(3)] public PositionInfo PosInfo { get; set; } = new PositionInfo();
-        [Key(4)] public int Tick { get; set; }
         public void MergeFrom(S_Move other)
         {
             if (other.ObjectId != 0)
@@ -179,8 +184,6 @@ namespace Shared.Packet
                 PosInfo ??= new PositionInfo();
                 PosInfo.MergeFrom(other.PosInfo);
             }
-            if (other.Tick != 0)
-                Tick = other.Tick;
         }
     }
 
@@ -191,7 +194,6 @@ namespace Shared.Packet
         [Key(0)] public uint SeqNumber { get; set; }
         [Key(1)] public long ClientTime { get; set; }
         [Key(2)] public PositionInfo PosInfo { get; set; } = new PositionInfo();
-        [Key(3)] public int Tick { get; set; }
 
         public void MergeFrom(C_Move other)
         {
@@ -204,8 +206,6 @@ namespace Shared.Packet
                 PosInfo ??= new PositionInfo();
                 PosInfo.MergeFrom(other.PosInfo);
             }
-            if (other.Tick != 0)
-                Tick = other.Tick;
         }
     }
     #endregion

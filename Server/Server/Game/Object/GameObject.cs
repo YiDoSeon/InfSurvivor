@@ -11,7 +11,13 @@ namespace Server.Game.Object
     {
         public GameObjectType ObjectType { get; set; }
         public GameRoom Room { get; set; }
-        public ObjectInfo Info { get; set; } = new ObjectInfo() { PosInfo = new PositionInfo() };
+        public ObjectInfo Info { get; set; } = new ObjectInfo()
+        { 
+            PosInfo = new PositionInfo()
+            {
+                FacingDir = new CVector2(0f, -1f),
+            }
+        };
 
         public int Id
         {
@@ -22,19 +28,25 @@ namespace Server.Game.Object
         public PositionInfo PosInfo
         {
             get => Info.PosInfo;
-            set => Info.PosInfo = value;
+            protected set => Info.PosInfo = value;
         }
 
         public CVector2 Pos
         {
             get => PosInfo.Pos;
-            set => PosInfo.Pos = value;
+            protected set => PosInfo.Pos = value;
         }
 
         public CVector2 Velocity
         {
             get => PosInfo.Velocity;
-            set => PosInfo.Velocity = value;
+            protected set => PosInfo.Velocity = value;
+        }
+
+        public CVector2 FacingDir
+        {
+            get => PosInfo.FacingDir;
+            protected set => PosInfo.FacingDir = value;
         }
     }
 }
