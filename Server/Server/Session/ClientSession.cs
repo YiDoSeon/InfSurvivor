@@ -10,6 +10,7 @@ namespace Server.Session
 {
     public class ClientSession : PacketSession
     {
+        private const int FLUSH_MS = 33;
         public Player MyPlayer { get; set; }
         public int SessionId { get; }
         private object _lock = new object();
@@ -71,7 +72,7 @@ namespace Server.Session
             lock (_lock)
             {
                 long delta = Environment.TickCount64 - lastSendTick;
-                if (delta < 33 && reservedSendBytes < 10000)
+                if (delta < FLUSH_MS && reservedSendBytes < 10000)
                 {
                     return;
                 }
