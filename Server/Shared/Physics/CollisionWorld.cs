@@ -8,17 +8,17 @@ namespace Shared.Physics
 {
     public class CollisionWorld
     {
-        private SpatialHashGrid gridSystem;
-        public float CellSize => gridSystem.CellSize;
+        private SpatialHashGrid grid;
+        public float CellSize => grid.CellSize;
         private List<ColliderBase> allColliders = new List<ColliderBase>();
         private Dictionary<IColliderTrigger, ColliderBase> colliderMap = new Dictionary<IColliderTrigger, ColliderBase>();
         private HashSet<IColliderTrigger> currentTickOverlaps = new HashSet<IColliderTrigger>();
         private List<IColliderTrigger> removalCache = new List<IColliderTrigger>();
         private Dictionary<CollisionLayer, int> collisionMatrix = new Dictionary<CollisionLayer, int>();
 
-        public void Init()
+        public void Init(float cellSize = 2f)
         {
-            gridSystem = new SpatialHashGrid(2f);
+            grid = new SpatialHashGrid(cellSize);
             InitMatrix();
         }
 
@@ -61,12 +61,12 @@ namespace Shared.Physics
 
         public void AddToCells(HashSet<CVector2Int> occupiedCells, ColliderBase col)
         {
-            gridSystem?.AddToCells(occupiedCells, col);
+            grid?.AddToCells(occupiedCells, col);
         }
 
         public void RemoveFromCells(HashSet<CVector2Int> occupiedCells, ColliderBase col)
         {
-            gridSystem?.RemoveFromCells(occupiedCells, col);
+            grid?.RemoveFromCells(occupiedCells, col);
         }
 
         public void RegisterCollider(ColliderBase collider)
@@ -92,13 +92,15 @@ namespace Shared.Physics
         public void UpdateOccupiedCells(ColliderBase col, HashSet<CVector2Int> occupiedCells)
         {
             CVector2 worldPos = col.Center;
-            CVector2 halfSize = col.HalfSize; 
+            CVector2 halfSize = col.HalfSize;
 
-            CVector2 minWorldPos = new CVector2(worldPos.x - halfSize.x, worldPos.y - halfSize.y);
-            CVector2 maxWorldPos = new CVector2(worldPos.x + halfSize.x, worldPos.y + halfSize.y);
+            CVector2Int minGridPos = new CVector2(worldPos.x - halfSize.x, worldPos.y - halfSize.y).ToGridPos(CellSize);
+            CVector2Int maxGridPos = new CVector2(worldPos.x + halfSize.x, worldPos.y + halfSize.y).ToGridPos(CellSize);
 
-            CVector2Int minGridPos = minWorldPos.ToGridPos(CellSize);
-            CVector2Int maxGridPos = maxWorldPos.ToGridPos(CellSize);
+            if (col.LastMinGrid == minGridPos && col.LastMaxGrid == maxGridPos)
+            {
+                return;
+            }
 
             RemoveFromCells(occupiedCells, col);
             occupiedCells.Clear();
@@ -107,12 +109,14 @@ namespace Shared.Physics
             {
                 for (int y = minGridPos.y; y <= maxGridPos.y; y++)
                 {
-                    CVector2Int coord = new CVector2Int(x, y);
-                    occupiedCells.Add(coord);
+                    occupiedCells.Add(new CVector2Int(x, y));
                 }
             }
 
             AddToCells(occupiedCells, col);
+
+            col.LastMinGrid = minGridPos;
+            col.LastMaxGrid = maxGridPos;
         }
 
         public IEnumerable<ColliderBase> GetColliderInRange(ColliderBase searcher, bool alsoCheckObjectBox = true)
@@ -142,7 +146,7 @@ namespace Shared.Physics
                     // 범위 내 grid pos
                     CVector2Int key = new CVector2Int(x, y);
 
-                    if (gridSystem.GridData.TryGetValue(key, out HashSet<ColliderBase> set) == false)
+                    if (grid.GridData.TryGetValue(key, out HashSet<ColliderBase> set) == false)
                     {
                         // 아무것도 없음
                         continue;

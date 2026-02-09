@@ -18,6 +18,8 @@ namespace Shared.Physics.Collider
         public CVector2 Position { get; set; }
         public abstract ColliderType Type { get; }
         public CVector2 Center => Position + Offset;
+        public CVector2Int LastMinGrid { get; set; }
+        public CVector2Int LastMaxGrid { get; set; }
         public HashSet<IColliderTrigger> OverlappingOwners = new HashSet<IColliderTrigger>();
         private readonly IColliderTrigger owner;
         public IColliderTrigger Owner => owner;
