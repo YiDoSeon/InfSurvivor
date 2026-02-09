@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Server.Game.Room;
 using Shared.Packet;
+using Shared.Packet.Struct;
 
 namespace Server.Game.Object
 {

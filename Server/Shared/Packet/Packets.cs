@@ -1,126 +1,13 @@
 using System;
 using System.Collections.Generic;
 using MessagePack;
+using Shared.Packet.Struct;
 
 namespace Shared.Packet
 {
     public interface IPacket
     {
         PacketId PacketId { get; }
-    }
-
-    [MessagePackObject]
-    public struct CVector2
-    {
-        [Key(0)] public float x;
-        [Key(1)] public float y;
-        public CVector2(float x, float y)
-        {
-            this.x = x;
-            this.y = y;
-        }
-
-        public static bool operator ==(CVector2 lhs, CVector2 rhs)
-        {
-            return lhs.x == rhs.x && lhs.y == rhs.y;
-        }
-
-        public static bool operator !=(CVector2 lhs, CVector2 rhs)
-        {
-            return !(lhs == rhs);
-        }
-
-        public static CVector2 operator *(CVector2 lhs, float rhs)
-        {
-            return new CVector2(lhs.x * rhs, lhs.y * rhs);
-        }
-
-        public static CVector2 operator *(float rhs, CVector2 lhs)
-        {
-            return lhs * rhs;
-        }
-
-        public static CVector2 operator +(CVector2 lhs, CVector2 rhs)
-        {
-            return new CVector2(lhs.x + rhs.x, lhs.y + rhs.y);
-        }
-
-        public static CVector2 operator -(CVector2 lhs, CVector2 rhs)
-        {
-            return new CVector2(lhs.x - rhs.x, lhs.y - rhs.y);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return (CVector2)obj == this;
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        public override string ToString()
-        {
-            return $"({x}, {y})";
-        }
-    }
-
-    [MessagePackObject]
-    public struct CVector2Int
-    {
-        [Key(0)] public int x;
-        [Key(1)] public int y;
-        public CVector2Int(int x, int y)
-        {
-            this.x = x;
-            this.y = y;
-        }
-
-        public static bool operator ==(CVector2Int lhs, CVector2Int rhs)
-        {
-            return lhs.x == rhs.x && lhs.y == rhs.y;
-        }
-
-        public static bool operator !=(CVector2Int lhs, CVector2Int rhs)
-        {
-            return !(lhs == rhs);
-        }
-
-        public static CVector2Int operator *(CVector2Int lhs, int rhs)
-        {
-            return new CVector2Int(lhs.x * rhs, lhs.y * rhs);
-        }
-
-        public static CVector2Int operator *(int rhs, CVector2Int lhs)
-        {
-            return lhs * rhs;
-        }
-
-        public static CVector2Int operator +(CVector2Int lhs, CVector2Int rhs)
-        {
-            return new CVector2Int(lhs.x + rhs.x, lhs.y + rhs.y);
-        }
-
-        public static CVector2Int operator -(CVector2Int lhs, CVector2Int rhs)
-        {
-            return new CVector2Int(lhs.x - rhs.x, lhs.y - rhs.y);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return (CVector2Int)obj == this;
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        public override string ToString()
-        {
-            return $"({x}, {y})";
-        }
     }
 
     [MessagePackObject]
