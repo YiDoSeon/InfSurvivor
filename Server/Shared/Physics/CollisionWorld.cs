@@ -215,7 +215,7 @@ namespace Shared.Physics
 
                         currentTickOverlaps.Add(colB.Owner);
 
-                        if (colA.OverlappingIds.Add(colB.Owner))
+                        if (colA.OverlappingOwners.Add(colB.Owner))
                         {
                             colA.Owner?.OnCustomTriggerEnter(colB);
                         }
@@ -228,7 +228,7 @@ namespace Shared.Physics
 
                 removalCache.Clear();
 
-                foreach (IColliderTrigger oldOwner in colA.OverlappingIds)
+                foreach (IColliderTrigger oldOwner in colA.OverlappingOwners)
                 {
                     if (currentTickOverlaps.Contains(oldOwner) == false)
                     {
@@ -238,7 +238,7 @@ namespace Shared.Physics
 
                 foreach (IColliderTrigger toRemove in removalCache)
                 {
-                    colA.OverlappingIds.Remove(toRemove);
+                    colA.OverlappingOwners.Remove(toRemove);
                     ColliderBase other = FindColliderByOwner(toRemove);
                     if (other != null)
                     {

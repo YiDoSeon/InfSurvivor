@@ -10,7 +10,7 @@ namespace Shared.Physics.Collider
         Circle,
         Box,
     }
-    
+
     public abstract class ColliderBase
     {
         public CollisionLayer Layer { get; set; } = CollisionLayer.Default;
@@ -18,7 +18,7 @@ namespace Shared.Physics.Collider
         public CVector2 Position { get; set; }
         public abstract ColliderType Type { get; }
         public CVector2 Center => Position + Offset;
-        public HashSet<IColliderTrigger> OverlappingIds = new HashSet<IColliderTrigger>();
+        public HashSet<IColliderTrigger> OverlappingOwners = new HashSet<IColliderTrigger>();
         private readonly IColliderTrigger owner;
         public IColliderTrigger Owner => owner;
 
