@@ -56,6 +56,7 @@ namespace Server.Game.Room
 
             while (true)
             {
+                //sww.Restart();
                 long nowMs = sw.ElapsedMilliseconds;
                 double deltaMs = (nowMs - lastTimeMs) / 1000d;
                 lastTimeMs = nowMs;

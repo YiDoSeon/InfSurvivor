@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Server.Game.Job;
 using Server.Game.Object;
 using Shared.Packet;
 using Shared.Packet.Struct;
+using Shared.Physics;
 
 namespace Server.Game.Room
 {
@@ -12,18 +14,20 @@ namespace Server.Game.Room
         public int RoomId { get; set; }
         private Dictionary<int, Player> players = new Dictionary<int, Player>();
         private Dictionary<int, Monster> monsters = new Dictionary<int, Monster>();
-        private long lastServerTime;
+        public long LastServerTime { get; private set; }
+        public CollisionWorld CollisionWorld { get; private set; } = new CollisionWorld();
 
         public void Init()
         {
             Random rand = new Random();
-            float min = -5f;
-            float max = 5f;
-            for (int i = 0; i < 5; i++)
+            float min = -100f;
+            float max = 100f;
+            for (int i = 0; i < 1000; i++)
             {
                 Monster monster = ObjectManager.Instance.Add<Monster>();
                 {
                     monster.Info.Name = $"Monster-{i}";
+                    monster.SetRoom(this);
                     monster.InitPos(new PositionInfo()
                     {
                         Pos = new CVector2(
@@ -33,17 +37,27 @@ namespace Server.Game.Room
                     EnterGame(monster);
                 }
             }
+
+            CollisionWorld.Init();
         }
 
         public void Update(float deltaTime, long serverTime)
         {
-            lastServerTime = serverTime;
+            LastServerTime = serverTime;
             Flush();
 
+            //Stopwatch sww = new Stopwatch();
             foreach (Player player in players.Values)
             {
-                player.Move(deltaTime, serverTime);
+                player.OnTick(deltaTime);
             }
+            foreach (Monster monster in monsters.Values)
+            {
+                monster.OnTick(deltaTime);
+            }
+
+            CollisionWorld.OnTick();
+            //Console.WriteLine(sww.Elapsed.TotalMicroseconds);
         }
 
         public void EnterGame(GameObject gameObject)
@@ -59,7 +73,7 @@ namespace Server.Game.Room
             {
                 Player player = (Player)gameObject;
                 players.Add(gameObject.Id, player);
-                player.Room = this;
+                player.SetRoom(this);
 
                 {
                     S_EnterGame enterGamePacket = new S_EnterGame

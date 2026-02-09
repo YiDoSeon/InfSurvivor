@@ -2,15 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Server.Game.Room;
 using Server.Session;
 using Shared.Packet;
+using Shared.Packet.Struct;
+using Shared.Physics.Collider;
 
 namespace Server.Game.Object
 {
-    public class Player : GameObject
+    public class Player : GameObject, IColliderTrigger
     {
         public ClientSession Session { get; set; }
         public Queue<IPacket> pendingInputs = new Queue<IPacket>();
+        private CBoxCollider bodyCollider;
+        public override ColliderBase BodyCollider => bodyCollider;
         public uint LastProcessedSequence { get; set; }
         private long lastClientTime;
         private bool firePressed;
@@ -18,9 +23,22 @@ namespace Server.Game.Object
         public Player()
         {
             ObjectType = GameObjectType.Player;
+            bodyCollider = new CBoxCollider(
+                this,
+                new CVector2(0f, 0.5f),
+                Pos,
+                new CVector2(0.6f, 1f)
+            );
+            bodyCollider.Layer = CollisionLayer.Player;
         }
 
-        public void Move(float deltaTime, long serverTime)
+        public override void SetRoom(GameRoom room)
+        {
+            base.SetRoom(room);
+            Room.CollisionWorld.RegisterCollider(bodyCollider);
+        }
+
+        public override void OnTick(float deltaTime)
         {
             bool needToSync = false;
 
@@ -54,6 +72,7 @@ namespace Server.Game.Object
             {
                 SendMove();
             }
+            base.OnTick(deltaTime);
         }
 
         private void SendMove()
@@ -82,6 +101,21 @@ namespace Server.Game.Object
             {
                 session.Send(packet);
             }
+        }
+
+        public void OnCustomTriggerEnter(ColliderBase other)
+        {
+            
+        }
+
+        public void OnCustomTriggerStay(ColliderBase other)
+        {
+            
+        }
+
+        public void OnCustomTriggerExit(ColliderBase other)
+        {
+            
         }
     }
 }
