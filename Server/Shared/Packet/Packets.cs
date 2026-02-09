@@ -67,6 +67,63 @@ namespace Shared.Packet
     }
 
     [MessagePackObject]
+    public struct CVector2Int
+    {
+        [Key(0)] public int x;
+        [Key(1)] public int y;
+        public CVector2Int(int x, int y)
+        {
+            this.x = x;
+            this.y = y;
+        }
+
+        public static bool operator ==(CVector2Int lhs, CVector2Int rhs)
+        {
+            return lhs.x == rhs.x && lhs.y == rhs.y;
+        }
+
+        public static bool operator !=(CVector2Int lhs, CVector2Int rhs)
+        {
+            return !(lhs == rhs);
+        }
+
+        public static CVector2Int operator *(CVector2Int lhs, int rhs)
+        {
+            return new CVector2Int(lhs.x * rhs, lhs.y * rhs);
+        }
+
+        public static CVector2Int operator *(int rhs, CVector2Int lhs)
+        {
+            return lhs * rhs;
+        }
+
+        public static CVector2Int operator +(CVector2Int lhs, CVector2Int rhs)
+        {
+            return new CVector2Int(lhs.x + rhs.x, lhs.y + rhs.y);
+        }
+
+        public static CVector2Int operator -(CVector2Int lhs, CVector2Int rhs)
+        {
+            return new CVector2Int(lhs.x - rhs.x, lhs.y - rhs.y);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (CVector2Int)obj == this;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return $"({x}, {y})";
+        }
+    }
+
+    [MessagePackObject]
     public class ObjectInfo
     {
         [Key(0)] public int ObjectId { get; set; }
