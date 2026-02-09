@@ -15,6 +15,11 @@ namespace Server.Game.Object
         private long lastClientTime;
         private bool firePressed;
 
+        public Player()
+        {
+            ObjectType = GameObjectType.Player;
+        }
+
         public void Move(float deltaTime, long serverTime)
         {
             bool needToSync = false;

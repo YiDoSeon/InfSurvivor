@@ -9,7 +9,7 @@ namespace Server.Game.Object
 {
     public class GameObject
     {
-        public GameObjectType ObjectType { get; set; }
+        public GameObjectType ObjectType { get; protected set; }
         public GameRoom Room { get; set; }
         public ObjectInfo Info { get; set; } = new ObjectInfo()
         { 
@@ -47,6 +47,11 @@ namespace Server.Game.Object
         {
             get => PosInfo.FacingDir;
             protected set => PosInfo.FacingDir = value;
+        }
+
+        public void InitPos(PositionInfo posInfo)
+        {
+            PosInfo = posInfo;
         }
     }
 }
