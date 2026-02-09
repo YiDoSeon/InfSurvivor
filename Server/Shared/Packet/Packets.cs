@@ -45,6 +45,11 @@ namespace Shared.Packet
             return new CVector2(lhs.x + rhs.x, lhs.y + rhs.y);
         }
 
+        public static CVector2 operator -(CVector2 lhs, CVector2 rhs)
+        {
+            return new CVector2(lhs.x - rhs.x, lhs.y - rhs.y);
+        }
+
         public override bool Equals(object obj)
         {
             return (CVector2)obj == this;
