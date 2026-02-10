@@ -27,4 +27,18 @@ namespace Shared.Packet
         Player = 1,
         Monster = 2,
     }
+
+    public enum PlayerState
+    {
+        Idle,
+        Move,
+        MeleeAttack,
+    }
+
+    public enum EnemyState
+    {
+        Idle,
+        Move,
+        Damaged,
+    }
 }
