@@ -79,7 +79,7 @@ namespace Server.Game.Room
 
                     foreach (GameRoom room in roomSnapshot)
                     {
-                        room.Update(FIXED_DELTA_TIME, serverTime);
+                        room.Update(serverTime);
                     }
 
                     accumulator -= FIXED_DELTA_TIME;

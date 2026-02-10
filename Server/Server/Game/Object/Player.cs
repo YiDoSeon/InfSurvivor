@@ -21,7 +21,8 @@ namespace Server.Game.Object
         public uint LastProcessedSequence { get; set; }
         private long lastClientTime;
         private bool firePressed;
-        public bool ShouldCheckAttack { get; set; }
+        private CVector2 dir4 = CVector2.zero;
+        public C_MeleeAttack LastMeleeAttack { get; private set; }
 
         public Player()
         {
@@ -48,9 +49,31 @@ namespace Server.Game.Object
             Room.CollisionWorld.RegisterCollider(meleeAttackCollider);
         }
 
-        public override void OnTick(float deltaTime)
+        public override void OnTick()
         {
-            base.OnTick(deltaTime);
+            base.OnTick();
+            MoveProcess();
+            MeleeAttackProcess();
+        }
+
+        private void UpdateDir4()
+        {
+            float absX = MathF.Abs(FacingDir.x);
+            float absY = MathF.Abs(FacingDir.y);
+            if (absX >= absY)
+            {
+                dir4.x = MathF.Sign(FacingDir.x);
+                dir4.y = 0f;
+            }
+            else
+            {
+                dir4.x = 0f;
+                dir4.y = MathF.Sign(FacingDir.y);
+            }
+        }
+
+        private void MoveProcess()
+        {
             bool needToSync = false;
 
             while (pendingInputs.Count > 0)
@@ -64,6 +87,7 @@ namespace Server.Game.Object
                     Velocity = info.Velocity; // 이동 방향 및 속도
                     FacingDir = info.FacingDir;
                     firePressed = info.FirePressed; // TODO: firePressed 데이터 위치 수정
+                    UpdateDir4();
                     //Console.WriteLine($"#{movePacket.SeqNumber} ({Velocity})");
 
                     LastProcessedSequence = movePacket.SeqNumber;
@@ -76,47 +100,62 @@ namespace Server.Game.Object
 
             if (needsMovement)
             {
-                Pos += Velocity * deltaTime;
-            }
-
-            if (ShouldCheckAttack)
-            {
-                CVector2 dir4 = CVector2.zero;
-                float absX = MathF.Abs(FacingDir.x);
-                float absY = MathF.Abs(FacingDir.y);
-                if (absX >= absY)
-                {
-                    dir4.x = MathF.Sign(FacingDir.x);
-                    dir4.y = 0f;
-                }
-                else
-                {
-                    dir4.x = 0f;
-                    dir4.y = MathF.Sign(FacingDir.y);                    
-                }
-                
-                if (dir4 != CVector2.zero)
-                {
-                    meleeAttackCollider.Position = Pos + dir4 * 0.8f;
-                    List<ColliderBase> colliders = Room.CollisionWorld.GetOverlappedColliders(
-                        meleeAttackCollider,
-                        targetMask: Extensions.CombineMask(CollisionLayer.Monster)
-                    );
-                    foreach (ColliderBase collider in colliders)
-                    {
-                        if (collider.Owner is Enemy enemy)
-                        {
-                            enemy.OnDamaged(this);
-                        }
-                    }
-                }
-                ShouldCheckAttack = false;
+                Pos += Velocity * GameLogic.FIXED_DELTA_TIME;
             }
 
             if (needToSync)
             {
                 SendMove();
             }
+        }
+
+        public void SetMeleeAttack(C_MeleeAttack meleeAttack)
+        {
+            LastMeleeAttack = meleeAttack;
+        }
+
+        private void MeleeAttackProcess()
+        {
+            if (LastMeleeAttack == null)
+            {
+                return;
+            }
+
+            uint seqNumber = LastMeleeAttack.SeqNumber;
+            List<DamagedElement> damagedList = new List<DamagedElement>();
+            LastMeleeAttack = null;
+
+            if (dir4 == CVector2.zero)
+            {
+                SendMeleeAttack(seqNumber, damagedList);
+                return;
+            }
+
+            meleeAttackCollider.Position = Pos + dir4 * 0.8f;
+            List<ColliderBase> colliders = Room.CollisionWorld.GetOverlappedColliders(
+                meleeAttackCollider,
+                targetMask: Extensions.CombineMask(CollisionLayer.Monster)
+            );
+            foreach (ColliderBase collider in colliders)
+            {
+                if (collider.Owner is Enemy enemy)
+                {
+                    CVector2 currentPos = enemy.Pos;
+
+                    enemy.OnDamaged(this);
+
+                    CVector2 expectedPos = currentPos + (enemy.KnockBackDir * enemy.KnockBackSpeed * 0.1f);
+
+                    damagedList.Add(new DamagedElement()
+                    {
+                        EnemyId = enemy.Id,
+                        FinalPos = expectedPos,
+                        Damage = 10,
+                    });
+                }
+            }
+            
+            SendMeleeAttack(seqNumber, damagedList);
         }
 
         private void SendMove()
@@ -136,6 +175,18 @@ namespace Server.Game.Object
             };
             //Console.WriteLine($"#{move.SeqNumber} ({Pos}) ({Velocity})");
             Room.BroadCast(move);
+        }
+
+        private void SendMeleeAttack(uint seqNumber, List<DamagedElement> damagedList)
+        {
+            S_MeleeAttack packet = new S_MeleeAttack()
+            {
+                SeqNumber = seqNumber,
+                AttackerId = Id,
+                Targets = damagedList
+            };
+
+            Room.BroadCast(packet);
         }
 
         public void OnCustomTriggerEnter(ColliderBase other)

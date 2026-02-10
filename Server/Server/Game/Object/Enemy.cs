@@ -18,6 +18,7 @@ namespace Server.Game.Object
         private StateMachine<Enemy, EnemyState> stateMachine;
         public CVector2 KnockBackDir { get; private set; }
         private float knockBackSpeed = 5f;
+        public float KnockBackSpeed => knockBackSpeed;
         public Enemy()
         {
             ObjectType = GameObjectType.Monster;
@@ -45,9 +46,9 @@ namespace Server.Game.Object
             Room.CollisionWorld.RegisterCollider(bodyCollider);
         }
 
-        public override void OnTick(float deltaTime)
+        public override void OnTick()
         {
-            base.OnTick(deltaTime);
+            base.OnTick();
             stateMachine.FixedUpdate();
         }
 

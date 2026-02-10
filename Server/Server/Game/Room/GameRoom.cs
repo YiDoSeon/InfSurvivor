@@ -24,9 +24,11 @@ namespace Server.Game.Room
             Random rand = new Random();
             // float[] randX = new float[2] {-20f, 20f};
             // float[] randY = new float[2] {-11f, 11f};
-            float[] randX = new float[2] {-20f, 20f};
-            float[] randY = new float[2] {-20f, 20f};
-            for (int i = 0; i < 1000; i++)
+            // float[] randX = new float[2] {-20f, 20f};
+            // float[] randY = new float[2] {-20f, 20f};
+            float[] randX = new float[2] {-5f, 5f};
+            float[] randY = new float[2] {-5f, 5f};
+            for (int i = 0; i < 10; i++)
             {
                 Enemy monster = ObjectManager.Instance.Add<Enemy>();
                 {
@@ -45,7 +47,7 @@ namespace Server.Game.Room
             CollisionWorld.Init();
         }
 
-        public void Update(float deltaTime, long serverTime)
+        public void Update(long serverTime)
         {
             LastServerTime = serverTime;
             Flush();
@@ -53,11 +55,11 @@ namespace Server.Game.Room
             //Stopwatch sww = new Stopwatch();
             foreach (Player player in players.Values)
             {
-                player.OnTick(deltaTime);
+                player.OnTick();
             }
             foreach (Enemy monster in monsters.Values)
             {
-                monster.OnTick(deltaTime);
+                monster.OnTick();
             }
 
             CollisionWorld.OnTick();
@@ -174,7 +176,7 @@ namespace Server.Game.Room
 
         public void HandleMeleeAttack(Player player, C_MeleeAttack attack)
         {
-            player.ShouldCheckAttack = true;
+            player.SetMeleeAttack(attack);
         }
     }
 }

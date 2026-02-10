@@ -60,7 +60,7 @@ namespace Server.Game.Object
             PosInfo = posInfo;
         }
 
-        public virtual void OnTick(float deltaTime)
+        public virtual void OnTick()
         {
             BodyCollider?.UpdatePosition(Pos);
             Room.CollisionWorld.UpdateOccupiedCells(BodyCollider, occupiedCells);

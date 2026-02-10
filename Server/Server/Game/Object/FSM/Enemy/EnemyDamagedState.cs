@@ -32,7 +32,7 @@ namespace Server.Game.Object.FSM.Enemy
 
         public override void Exit()
         {
-            Console.WriteLine($"{entity.Info.Name}: {entity.Pos}");
+            //Console.WriteLine($"{entity.Info.Name}: {entity.Pos}");
         }
     }
 }
