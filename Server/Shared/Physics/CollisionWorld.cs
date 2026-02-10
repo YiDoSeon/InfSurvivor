@@ -40,13 +40,13 @@ namespace Shared.Physics
 
             if (canCollide)
             {
-                collisionMatrix[layerA] |= (1 << (int)layerB);
-                collisionMatrix[layerB] |= (1 << (int)layerA);
+                collisionMatrix[layerA] |= layerB.ToMask();
+                collisionMatrix[layerB] |= layerA.ToMask();
             }
             else
             {
-                collisionMatrix[layerA] &= ~(1 << (int)layerB);
-                collisionMatrix[layerB] &= ~(1 << (int)layerA);
+                collisionMatrix[layerA] &= ~layerB.ToMask();
+                collisionMatrix[layerB] &= ~layerA.ToMask();
             }
         }
 
@@ -119,7 +119,7 @@ namespace Shared.Physics
             col.LastMaxGrid = maxGridPos;
         }
 
-        public IEnumerable<ColliderBase> GetOverlappedColliders(ColliderBase searcher, bool alsoCheckObjectBox = true)
+        public IEnumerable<ColliderBase> GetOverlappedColliders(ColliderBase searcher, bool alsoCheckObjectBox = true, int? targetMask = null)
         {
             float targetX = searcher.Center.x;
             float targetY = searcher.Center.y;
@@ -168,11 +168,22 @@ namespace Shared.Physics
                             continue;
                         }
 
-                        // 레이어상 서로 충돌하는지 체크
-                        if (ShouldCollide(searcher.Layer, col.Layer) == false)
+                        if (targetMask.HasValue)
                         {
-                            continue;
+                            if ((targetMask & col.Layer.ToMask()) == 0)
+                            {
+                                continue;
+                            }
                         }
+                        else
+                        {
+                            // 레이어상 서로 충돌하는지 체크
+                            if (ShouldCollide(searcher.Layer, col.Layer) == false)
+                            {
+                                continue;
+                            }                            
+                        }
+
 
                         if (alsoCheckObjectBox)
                         {
@@ -204,7 +215,7 @@ namespace Shared.Physics
                     continue;
                 }
 
-                IEnumerable<ColliderBase> candidates = GetOverlappedColliders(colA, false);
+                IEnumerable<ColliderBase> candidates = GetOverlappedColliders(colA, alsoCheckObjectBox: false);
                 currentTickOverlaps.Clear();
 
                 foreach (ColliderBase colB in candidates)
