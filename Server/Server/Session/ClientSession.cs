@@ -89,13 +89,13 @@ namespace Server.Session
 
         public void HandleEnterGame(C_EnterGame enterGamePacket)
         {
-            Console.WriteLine(enterGamePacket.Name);
 
             MyPlayer = ObjectManager.Instance.Add<Player>();
             {
                 MyPlayer.Info.Name = enterGamePacket.Name;
                 MyPlayer.Session = this;
             }
+            Console.WriteLine($"{enterGamePacket.Name} {MyPlayer.Id}");
 
             GameLogic.Instance.AddPlayerToRoom(MyPlayer, 1);
         }
