@@ -119,7 +119,7 @@ namespace Shared.Physics
             col.LastMaxGrid = maxGridPos;
         }
 
-        public IEnumerable<ColliderBase> GetColliderInRange(ColliderBase searcher, bool alsoCheckObjectBox = true)
+        public IEnumerable<ColliderBase> GetOverlappedColliders(ColliderBase searcher, bool alsoCheckObjectBox = true)
         {
             float targetX = searcher.Center.x;
             float targetY = searcher.Center.y;
@@ -204,7 +204,7 @@ namespace Shared.Physics
                     continue;
                 }
 
-                IEnumerable<ColliderBase> candidates = GetColliderInRange(colA, false);
+                IEnumerable<ColliderBase> candidates = GetOverlappedColliders(colA, false);
                 currentTickOverlaps.Clear();
 
                 foreach (ColliderBase colB in candidates)
