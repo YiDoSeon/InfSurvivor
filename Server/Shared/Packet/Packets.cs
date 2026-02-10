@@ -188,4 +188,10 @@ namespace Shared.Packet
         }
     }
     #endregion
+
+    [MessagePackObject]
+    public class C_MeleeAttack : IPacket
+    {
+        [IgnoreMember] public PacketId PacketId => PacketId.C_MELEE_ATTACK;
+    }
 }

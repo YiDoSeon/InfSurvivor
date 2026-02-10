@@ -13,6 +13,7 @@ namespace Shared.Packet
         C_MOVE,
         S_TIME_SYNC,
         C_TIME_SYNC,
+        C_MELEE_ATTACK,
     }
 
     public enum GameObjectType

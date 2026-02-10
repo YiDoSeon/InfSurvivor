@@ -48,4 +48,25 @@ public class PacketHandler
 
         clientSession.HandleTimeSync(timeSyncPacket);
     }
+
+    internal static void C_MeleeAttackHandler(PacketSession session, IPacket packet)
+    {
+        C_MeleeAttack meleeAttackPacket = (C_MeleeAttack)packet;
+        ClientSession clientSession = (ClientSession)session;
+
+        Player player = clientSession.MyPlayer;
+        if (player == null)
+        {
+            return;
+        }
+
+        GameRoom room = player.Room;
+        if (room == null)
+        {
+            return;
+        }
+
+        room.Push(room.HandleMeleeAttack, player, meleeAttackPacket);
+
+    }
 }
