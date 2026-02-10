@@ -19,8 +19,8 @@ namespace Server.Game.Room
         private int roomId = 1;
 
         #region 프레임 관련
-        private const int TICKS_PER_SEC = 30;
-        private const float FIXED_DELTA_TIME = 1f / TICKS_PER_SEC;
+        public const int TICKS_PER_SEC = 30;
+        public const float FIXED_DELTA_TIME = 1f / TICKS_PER_SEC;
         private Stopwatch sw = new Stopwatch();
         private long serverTime = 0;
         /// <summary>
