@@ -7,7 +7,7 @@ namespace Shared.Utils
         public static bool CircleVsCircle(CCircleCollider a, CCircleCollider b)
         {
             float radiusSum = a.Radius + b.Radius;
-            float distSq = (a.Position - b.Position).sqrMagnitude;
+            float distSq = (a.Center - b.Center).sqrMagnitude;
             return distSq <= (radiusSum * radiusSum);
         }
 

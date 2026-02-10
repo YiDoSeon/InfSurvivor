@@ -15,6 +15,8 @@ namespace Shared.Physics
         private HashSet<IColliderTrigger> currentTickOverlaps = new HashSet<IColliderTrigger>();
         private List<IColliderTrigger> removalCache = new List<IColliderTrigger>();
         private Dictionary<CollisionLayer, int> collisionMatrix = new Dictionary<CollisionLayer, int>();
+        private readonly HashSet<ColliderBase> searchHashCache = new HashSet<ColliderBase>();
+        private readonly List<ColliderBase> searchResultList = new List<ColliderBase>();
 
         public void Init(float cellSize = 2f)
         {
@@ -119,8 +121,27 @@ namespace Shared.Physics
             col.LastMaxGrid = maxGridPos;
         }
 
-        public IEnumerable<ColliderBase> GetOverlappedColliders(ColliderBase searcher, bool alsoCheckObjectBox = true, int? targetMask = null)
+        public List<ColliderBase> GetOverlappedColliders(ColliderBase searcher, bool alsoCheckObjectBox = true, int? targetMask = null)
         {
+            return GetOverlappedCollidersInternal(searcher, alsoCheckObjectBox, targetMask, false);
+        }
+
+        private List<ColliderBase> GetOverlappedCollidersInternal(ColliderBase searcher, bool alsoCheckObjectBox = true, int? targetMask = null, bool isInternal = false)
+        {
+            HashSet<ColliderBase> duplicateChecker;
+            List<ColliderBase> result;
+            if (isInternal)
+            {
+                searchHashCache.Clear();
+                searchResultList.Clear();
+                duplicateChecker = searchHashCache;
+                result = searchResultList;
+            }
+            else
+            {
+                duplicateChecker = new HashSet<ColliderBase>();
+                result = new List<ColliderBase>();
+            }
             float targetX = searcher.Center.x;
             float targetY = searcher.Center.y;
             float halfSizeX = searcher.HalfSize.x;
@@ -181,7 +202,7 @@ namespace Shared.Physics
                             if (ShouldCollide(searcher.Layer, col.Layer) == false)
                             {
                                 continue;
-                            }                            
+                            }
                         }
 
 
@@ -193,10 +214,16 @@ namespace Shared.Physics
                                 continue;
                             }
                         }
-                        yield return col;
+
+                        if (duplicateChecker.Add(col))
+                        {
+                            result.Add(col);
+                        }
                     }
                 }
             }
+
+            return result;
         }
 
         public ColliderBase FindColliderByOwner(IColliderTrigger owner)
@@ -215,7 +242,7 @@ namespace Shared.Physics
                     continue;
                 }
 
-                IEnumerable<ColliderBase> candidates = GetOverlappedColliders(colA, alsoCheckObjectBox: false);
+                List<ColliderBase> candidates = GetOverlappedCollidersInternal(colA, alsoCheckObjectBox: false, isInternal: true);
                 currentTickOverlaps.Clear();
 
                 foreach (ColliderBase colB in candidates)
