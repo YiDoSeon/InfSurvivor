@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Server.Game.Job;
 using Server.Game.Object;
+using Server.Session;
 using Shared.Packet;
 using Shared.Packet.Struct;
 using Shared.Physics;
@@ -13,26 +14,29 @@ namespace Server.Game.Room
     {
         public int RoomId { get; set; }
         private Dictionary<int, Player> players = new Dictionary<int, Player>();
-        private Dictionary<int, Monster> monsters = new Dictionary<int, Monster>();
+        private Dictionary<int, Enemy> monsters = new Dictionary<int, Enemy>();
         public long LastServerTime { get; private set; }
         public CollisionWorld CollisionWorld { get; private set; } = new CollisionWorld();
 
         public void Init()
         {
+            CVector2 offset = new CVector2(1.4f, -8f);
             Random rand = new Random();
-            float min = -100f;
-            float max = 100f;
+            // float[] randX = new float[2] {-20f, 20f};
+            // float[] randY = new float[2] {-11f, 11f};
+            float[] randX = new float[2] {-20f, 20f};
+            float[] randY = new float[2] {-20f, 20f};
             for (int i = 0; i < 1000; i++)
             {
-                Monster monster = ObjectManager.Instance.Add<Monster>();
+                Enemy monster = ObjectManager.Instance.Add<Enemy>();
                 {
                     monster.Info.Name = $"Monster-{i}";
                     monster.SetRoom(this);
                     monster.InitPos(new PositionInfo()
                     {
                         Pos = new CVector2(
-                            rand.NextSingle() * (max - min) + min,
-                            rand.NextSingle() * (max - min) + min)
+                            offset.x + rand.NextSingle() * (randX[1] - randX[0]) + randX[0],
+                            offset.y + rand.NextSingle() * (randY[1] - randY[0]) + randY[0])
                     });
                     EnterGame(monster);
                 }
@@ -51,13 +55,22 @@ namespace Server.Game.Room
             {
                 player.OnTick(deltaTime);
             }
-            foreach (Monster monster in monsters.Values)
+            foreach (Enemy monster in monsters.Values)
             {
                 monster.OnTick(deltaTime);
             }
 
             CollisionWorld.OnTick();
             //Console.WriteLine(sww.Elapsed.TotalMicroseconds);
+        }
+
+        public void BroadCast<T>(T packet) where T : IPacket
+        {
+            List<ClientSession> sessions = SessionManager.Instance.GetSessions();
+            foreach (ClientSession session in sessions)
+            {
+                session.Send(packet);
+            }
         }
 
         public void EnterGame(GameObject gameObject)
@@ -92,7 +105,7 @@ namespace Server.Game.Room
                         info.MergeFrom(p.Info);
                         spawnPacket.Objects.Add(info);
                     }
-                    foreach (Monster m in monsters.Values)
+                    foreach (Enemy m in monsters.Values)
                     {
                         ObjectInfo info = new ObjectInfo();
                         info.MergeFrom(m.Info);
@@ -103,7 +116,7 @@ namespace Server.Game.Room
             }
             else if (type == GameObjectType.Monster)
             {
-                Monster monster = (Monster)gameObject;
+                Enemy monster = (Enemy)gameObject;
                 monsters.Add(gameObject.Id, monster);
                 monster.Room = this;
             }
@@ -157,6 +170,11 @@ namespace Server.Game.Room
             }
 
             player.pendingInputs.Enqueue(movePacket);
+        }
+
+        public void HandleMeleeAttack(Player player, C_MeleeAttack attack)
+        {
+            player.ShouldCheckAttack = true;
         }
     }
 }

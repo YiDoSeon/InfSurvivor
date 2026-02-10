@@ -7,6 +7,7 @@ using Server.Session;
 using Shared.Packet;
 using Shared.Packet.Struct;
 using Shared.Physics.Collider;
+using Shared.Utils;
 
 namespace Server.Game.Object
 {
@@ -15,14 +16,21 @@ namespace Server.Game.Object
         public ClientSession Session { get; set; }
         public Queue<IPacket> pendingInputs = new Queue<IPacket>();
         private CBoxCollider bodyCollider;
+        private CCircleCollider meleeAttackCollider;
         public override ColliderBase BodyCollider => bodyCollider;
         public uint LastProcessedSequence { get; set; }
         private long lastClientTime;
         private bool firePressed;
+        public bool ShouldCheckAttack { get; set; }
 
         public Player()
         {
             ObjectType = GameObjectType.Player;
+        }
+
+        public override void SetRoom(GameRoom room)
+        {
+            base.SetRoom(room);
             bodyCollider = new CBoxCollider(
                 this,
                 new CVector2(0f, 0.5f),
@@ -30,16 +38,19 @@ namespace Server.Game.Object
                 new CVector2(0.6f, 1f)
             );
             bodyCollider.Layer = CollisionLayer.Player;
-        }
-
-        public override void SetRoom(GameRoom room)
-        {
-            base.SetRoom(room);
             Room.CollisionWorld.RegisterCollider(bodyCollider);
+
+            meleeAttackCollider = new CCircleCollider(
+                this,
+                new CVector2(0f, 0.5f),
+                Pos,
+                0.75f);
+            Room.CollisionWorld.RegisterCollider(meleeAttackCollider);
         }
 
         public override void OnTick(float deltaTime)
         {
+            base.OnTick(deltaTime);
             bool needToSync = false;
 
             while (pendingInputs.Count > 0)
@@ -68,11 +79,44 @@ namespace Server.Game.Object
                 Pos += Velocity * deltaTime;
             }
 
+            if (ShouldCheckAttack)
+            {
+                CVector2 dir4 = CVector2.zero;
+                float absX = MathF.Abs(FacingDir.x);
+                float absY = MathF.Abs(FacingDir.y);
+                if (absX >= absY)
+                {
+                    dir4.x = MathF.Sign(FacingDir.x);
+                    dir4.y = 0f;
+                }
+                else
+                {
+                    dir4.x = 0f;
+                    dir4.y = MathF.Sign(FacingDir.y);                    
+                }
+                
+                if (dir4 != CVector2.zero)
+                {
+                    meleeAttackCollider.Position = Pos + dir4 * 0.8f;
+                    List<ColliderBase> colliders = Room.CollisionWorld.GetOverlappedColliders(
+                        meleeAttackCollider,
+                        targetMask: Extensions.CombineMask(CollisionLayer.Monster)
+                    );
+                    foreach (ColliderBase collider in colliders)
+                    {
+                        if (collider.Owner is Enemy enemy)
+                        {
+                            enemy.OnDamaged(this);
+                        }
+                    }
+                }
+                ShouldCheckAttack = false;
+            }
+
             if (needToSync)
             {
                 SendMove();
             }
-            base.OnTick(deltaTime);
         }
 
         private void SendMove()
@@ -91,16 +135,7 @@ namespace Server.Game.Object
                 }
             };
             //Console.WriteLine($"#{move.SeqNumber} ({Pos}) ({Velocity})");
-            BroadCast(move);
-        }
-        
-        private void BroadCast<T>(T packet) where T: IPacket
-        {
-            List<ClientSession> sessions = SessionManager.Instance.GetSessions();
-            foreach (ClientSession session in sessions)
-            {
-                session.Send(packet);
-            }
+            Room.BroadCast(move);
         }
 
         public void OnCustomTriggerEnter(ColliderBase other)
