@@ -1,7 +1,12 @@
 # InfSurvivor
 <video controls src="Resource/deom.mp4" title="Title" width="1280" height="720"></video>
 
+## 클라이언트 Github
+
+* 🛸 **Client**: [InfSurvivor Client](https://github.com/YiDoSeon/InfSurvivorClient)
+
 ## 1. 프로젝트 개요
+
 - **목표**: 로그라이크 장르의 멀티플레이 게임 구현을 위한 고성능 서버 프레임워크 제작 및 유니티 엔진 연동
 - **핵심 성과**
   - `MessagePack`을 활용한 고속 직렬화 시스템 구축
