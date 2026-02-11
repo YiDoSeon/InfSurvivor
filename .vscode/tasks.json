@@ -19,7 +19,7 @@
             "type": "shell",
             "windows": {
                 "command": 
-                "xcopy Shared.dll ${workspaceFolder}\\Client\\Assets\\Plugins\\ /y"
+                "xcopy Shared.dll ${workspaceFolder}\\InfSurvivorClient\\Assets\\Plugins\\ /y"
             },
             "options": {
                 "cwd": "${workspaceFolder}\\Server\\Shared\\bin\\Debug\\netstandard2.1"

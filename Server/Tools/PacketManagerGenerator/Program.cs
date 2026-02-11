@@ -12,7 +12,7 @@ class Program
 
     private const string SERVER_PATH = "Server/Server/Packet";
     private const string DUMMY_CLIENT_PATH = "Server/DummyClient/Packet";
-    private const string CLIENT_PATH = "Client/Assets/InfSurvivor/Scripts/Runtime/Network/Packet";
+    private const string CLIENT_PATH = "InfSurvivorClient/Assets/InfSurvivor/Scripts/Runtime/Network/Packet";
 
     private static void Main(string[] args)
     {
