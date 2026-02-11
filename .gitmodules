@@ -1,0 +1,3 @@
+[submodule "InfSurvivorClient"]
+	path = InfSurvivorClient
+	url = https://github.com/YiDoSeon/InfSurvivorClient.git
