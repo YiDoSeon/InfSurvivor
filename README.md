@@ -3,7 +3,7 @@
 
 ## 클라이언트 Github
 
-* 🛸 **Client**: [InfSurvivor Client](https://github.com/YiDoSeon/InfSurvivorClient)
+* **Client**: [InfSurvivor Client](https://github.com/YiDoSeon/InfSurvivorClient)
 
 ## 1. 프로젝트 개요
 
