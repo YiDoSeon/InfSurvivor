@@ -193,8 +193,9 @@ namespace Shared.Packet
     public struct DamagedElement
     {
         [Key(0)] public int EnemyId { get; set; }
-        [Key(1)] public CVector2 FinalPos { get; set; }
-        [Key(2)] public int Damage { get; set; }
+        [Key(1)] public CVector2 Pos { get; set; }
+        [Key(2)] public CVector2 Velocity { get; set; }
+        [Key(3)] public int Damage { get; set; }
     }
 
     #region MeleeAttack
@@ -202,16 +203,22 @@ namespace Shared.Packet
     public class C_MeleeAttack : IPacket
     {
         [IgnoreMember] public PacketId PacketId => PacketId.C_MELEE_ATTACK;
-        [Key(0)] public uint SeqNumber { get; set; }
     }
 
     [MessagePackObject]
     public class S_MeleeAttack : IPacket
     {
         [IgnoreMember] public PacketId PacketId => PacketId.S_MELEE_ATTACK;
-        [Key(0)] public uint SeqNumber { get; set; }
         [Key(1)] public int AttackerId { get; set; }
         [Key(2)] public List<DamagedElement> Targets { get; set; }
+
+        public void MergeFrom(S_MeleeAttack other)
+        {
+            if (other.AttackerId != 0)
+                AttackerId = other.AttackerId;
+            if (other.Targets != default)
+                Targets = other.Targets;
+        }
     }
     #endregion
 }

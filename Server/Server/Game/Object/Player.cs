@@ -121,13 +121,12 @@ namespace Server.Game.Object
                 return;
             }
 
-            uint seqNumber = LastMeleeAttack.SeqNumber;
             List<DamagedElement> damagedList = new List<DamagedElement>();
             LastMeleeAttack = null;
 
             if (dir4 == CVector2.zero)
             {
-                SendMeleeAttack(seqNumber, damagedList);
+                SendMeleeAttack(damagedList);
                 return;
             }
 
@@ -140,22 +139,20 @@ namespace Server.Game.Object
             {
                 if (collider.Owner is Enemy enemy)
                 {
-                    CVector2 currentPos = enemy.Pos;
-
                     enemy.OnDamaged(this);
-
-                    CVector2 expectedPos = currentPos + (enemy.KnockBackDir * enemy.KnockBackSpeed * 0.1f);
+                    Console.WriteLine($"예상 {enemy.Info.Name} {enemy.ExpectedPos}");
 
                     damagedList.Add(new DamagedElement()
                     {
                         EnemyId = enemy.Id,
-                        FinalPos = expectedPos,
+                        Pos = enemy.ExpectedPos,
+                        Velocity = enemy.KnockBackDir,
                         Damage = 10,
                     });
                 }
             }
             
-            SendMeleeAttack(seqNumber, damagedList);
+            SendMeleeAttack(damagedList);
         }
 
         private void SendMove()
@@ -177,11 +174,10 @@ namespace Server.Game.Object
             Room.BroadCast(move);
         }
 
-        private void SendMeleeAttack(uint seqNumber, List<DamagedElement> damagedList)
+        private void SendMeleeAttack(List<DamagedElement> damagedList)
         {
             S_MeleeAttack packet = new S_MeleeAttack()
             {
-                SeqNumber = seqNumber,
                 AttackerId = Id,
                 Targets = damagedList
             };

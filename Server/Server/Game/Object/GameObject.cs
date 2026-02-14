@@ -20,6 +20,7 @@ namespace Server.Game.Object
         protected HashSet<CVector2Int> occupiedCells = new HashSet<CVector2Int>();
 
         public virtual ColliderBase BodyCollider { get; }
+        public float MoveSpeed { get; protected set; }
         public int Id
         {
             get => Info.ObjectId;
@@ -55,7 +56,7 @@ namespace Server.Game.Object
             Room = room;
         }
 
-        public void InitPos(PositionInfo posInfo)
+        public virtual void InitPos(PositionInfo posInfo)
         {
             PosInfo = posInfo;
         }

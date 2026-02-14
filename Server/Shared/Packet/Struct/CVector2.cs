@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using MessagePack;
 
@@ -86,6 +87,43 @@ namespace Shared.Packet.Struct
         public override string ToString()
         {
             return $"({x}, {y})";
+        }
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static CVector2 MoveTowards(CVector2 current, CVector2 target, float maxDistanceDelta)
+        {
+            float num = target.x - current.x;
+            float num2 = target.y - current.y;
+            float num3 = num * num + num2 * num2;
+            if (num3 == 0f || (maxDistanceDelta >= 0f && num3 <= maxDistanceDelta * maxDistanceDelta))
+            {
+                return target;
+            }
+
+            float num4 = (float)Math.Sqrt(num3);
+            CVector2 result = default(CVector2);
+            result.x = current.x + num / num4 * maxDistanceDelta;
+            result.y = current.y + num2 / num4 * maxDistanceDelta;
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static CVector2 MoveTowards(in CVector2 current, in CVector2 target, float maxDistanceDelta)
+        {
+            float num = target.x - current.x;
+            float num2 = target.y - current.y;
+            float num3 = num * num + num2 * num2;
+            if (num3 == 0f || (maxDistanceDelta >= 0f && num3 <= maxDistanceDelta * maxDistanceDelta))
+            {
+                return target;
+            }
+
+            float num4 = (float)Math.Sqrt(num3);
+            CVector2 result = default(CVector2);
+            result.x = current.x + num / num4 * maxDistanceDelta;
+            result.y = current.y + num2 / num4 * maxDistanceDelta;
+            return result;
         }
     }
 }

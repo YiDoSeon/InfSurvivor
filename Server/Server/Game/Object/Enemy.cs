@@ -17,12 +17,19 @@ namespace Server.Game.Object
         public override ColliderBase BodyCollider => bodyCollider;
         private StateMachine<Enemy, EnemyState> stateMachine;
         public CVector2 KnockBackDir { get; private set; }
-        private float knockBackSpeed = 5f;
-        public float KnockBackSpeed => knockBackSpeed;
+        public float KnockBackSpeed { get; private set; } = 10f;
+        public float KnockBackTime { get; private set; } = 0.1f;
+        public CVector2 ExpectedPos { get; private set; }
         public Enemy()
         {
             ObjectType = GameObjectType.Monster;
             CreateStateMachine();
+        }
+
+        public override void InitPos(PositionInfo posInfo)
+        {
+            base.InitPos(posInfo);
+            ExpectedPos = Pos;
         }
 
         private void CreateStateMachine()
@@ -49,6 +56,16 @@ namespace Server.Game.Object
         public override void OnTick()
         {
             base.OnTick();
+            float speed = 0f;
+            if (stateMachine.CurrentStateId == EnemyState.Damaged)
+            {
+                speed = KnockBackSpeed;
+            }
+            else if (stateMachine.CurrentStateId == EnemyState.Move)
+            {
+                speed = MoveSpeed;
+            }
+            Pos = CVector2.MoveTowards(Pos, ExpectedPos, speed * GameLogic.FIXED_DELTA_TIME);
             stateMachine.FixedUpdate();
         }
 
@@ -56,24 +73,19 @@ namespace Server.Game.Object
         {
             if (sender is Player player)
             {
-                KnockBackDir = player.FacingDir;
-                //Console.WriteLine(KnockBackDir);
+                KnockBackDir += player.FacingDir;
             }
-            //Console.WriteLine(Info.Name);
+            ExpectedPos = Pos + KnockBackDir.normalized * KnockBackSpeed * KnockBackTime;
             stateMachine.ChangeState(EnemyState.Damaged);
         }
 
-        public void KnockBack()
+        public void ResetKnockBackDir()
         {
-            Pos += KnockBackDir.normalized * knockBackSpeed * GameLogic.FIXED_DELTA_TIME;
+            KnockBackDir = CVector2.zero;
         }
 
         public void OnCustomTriggerEnter(ColliderBase other)
         {
-            // if (other.Owner is Player player)
-            // {
-            //     Console.WriteLine(player.Info.Name);
-            // }
         }
 
         public void OnCustomTriggerExit(ColliderBase other)

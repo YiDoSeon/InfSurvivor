@@ -2,9 +2,16 @@ using System.Collections.Generic;
 
 namespace Shared.FSM
 {
-    public class StateMachine<TEntity, TEnum> where TEnum : System.Enum
+    public abstract class StateMachine
+    {
+        public abstract void Update();
+        public abstract void FixedUpdate();
+    }
+    
+    public class StateMachine<TEntity, TEnum> : StateMachine where TEnum : System.Enum
     {
         private TEntity entity;
+        public TEntity Entity => entity;
         private Dictionary<TEnum, FiniteState<TEntity, TEnum>> stateCache = new Dictionary<TEnum, FiniteState<TEntity, TEnum>>();
         public FiniteState<TEntity, TEnum> CurrentState { get; private set; }
         public TEnum CurrentStateId { get; private set; }
@@ -38,12 +45,12 @@ namespace Shared.FSM
             CurrentState?.Enter();
         }
 
-        public void Update()
+        public override void Update()
         {
             CurrentState?.Update();
         }
 
-        public void FixedUpdate()
+        public override void FixedUpdate()
         {
             CurrentState?.FixedUpdate();
         }
